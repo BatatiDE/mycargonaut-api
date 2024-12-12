@@ -1,4 +1,3 @@
-Here's the complete **`README.md`** file ready to be added to your backend repository:
 
 ---
 
