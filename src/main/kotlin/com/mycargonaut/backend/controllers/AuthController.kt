@@ -1,7 +1,7 @@
 package com.mycargonaut.backend.controllers
 
 import com.mycargonaut.backend.config.JwtService
-import com.mycargonaut.backend.dto.UserDTO
+import com.mycargonaut.backend.dto.UserResponseDTO
 import com.mycargonaut.backend.entities.User
 import com.mycargonaut.backend.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,16 +46,11 @@ class AuthController(
             val token = jwtService.generateToken(foundUser.email)
 
             // Create a UserDTO for the response
-            val userDTO = UserDTO(
+            val userDTO = UserResponseDTO(
                 id = foundUser.id!!,
                 email = foundUser.email,
                 name = foundUser.name,
-                birthdate = foundUser.birthdate?.toString(),
                 phone = foundUser.phone,
-                role = foundUser.role,
-                isVerified = foundUser.isVerified,
-                createdAt = foundUser.createdAt.toString(),
-                updatedAt = foundUser.updatedAt.toString()
             )
 
             // Return the token and the UserDTO

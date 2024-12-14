@@ -1,12 +1,13 @@
 package com.mycargonaut.backend.controllers
 
-import com.mycargonaut.backend.dto.UserDTO
+import com.mycargonaut.backend.dto.UserResponseDTO
+import com.mycargonaut.backend.dto.UserUpdateDTO
+import com.mycargonaut.backend.entities.User
 import com.mycargonaut.backend.repositories.UserRepository
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
-import java.time.LocalDateTime
+import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/api/users")
@@ -15,93 +16,81 @@ class UserController(
 ) {
 
     /**
-     * Endpoint to fetch the logged-in user's profile.
+     * Fetch the logged-in user's profile.
      */
     @GetMapping("/me")
-    fun getUserProfile(): ResponseEntity<UserDTO> {
-        // Extract the logged-in user's email from the security context
+    fun getUserProfile(): ResponseEntity<UserResponseDTO> {
         val username = SecurityContextHolder.getContext().authentication.name
 
-        // Find the user in the database
         val user = userRepository.findByEmail(username)
-            ?: return ResponseEntity.status(404).body(null)
+            ?: throw NoSuchElementException("User with email $username not found")
 
-        // Convert User entity to UserDTO
-        val userDTO = UserDTO(
-            id = user.id!!,
-            email = user.email,
-            name = user.name,
-            birthdate = user.birthdate?.toString(),
-            phone = user.phone,
-            role = user.role,
-            isVerified = user.isVerified,
-            createdAt = user.createdAt.toString(),
-            updatedAt = user.updatedAt.toString()
-        )
-
-        return ResponseEntity.ok(userDTO)
+        return ResponseEntity.ok(toUserResponseDTO(user))
     }
 
     /**
-     * Endpoint to update the logged-in user's profile.
+     * Update the logged-in user's profile.
      */
     @PutMapping("/me")
-    fun updateUserProfile(@RequestBody updatedUser: UserDTO): ResponseEntity<Any> {
-        return try {
-            // Extract the logged-in user's email
-            val username = SecurityContextHolder.getContext().authentication.name
+    fun updateUserProfile(@RequestBody updatedUser: UserUpdateDTO): ResponseEntity<Map<String, String>> {
+        val username = SecurityContextHolder.getContext().authentication.name
 
-            // Find the user in the database
-            val user = userRepository.findByEmail(username)
-                ?: return ResponseEntity.status(404).body(mapOf("error" to "User not found"))
+        // Log the incoming payload for debugging
+        println("Received payload for update: $updatedUser")
 
-            // Update the user's profile
-            val updatedEntity = userRepository.save(
-                user.copy(
-                    name = updatedUser.name,
-                    phone = updatedUser.phone,
-                    birthdate = updatedUser.birthdate?.let { LocalDate.parse(it) }
-                )
-            )
+        val user = userRepository.findByEmail(username)
+            ?: throw NoSuchElementException("User with email $username not found")
 
-            // Build a response with updated data
-            val updatedUserDTO = UserDTO(
-                id = updatedEntity.id!!,
-                email = updatedEntity.email,
-                name = updatedEntity.name,
-                birthdate = updatedEntity.birthdate?.toString(),
-                phone = updatedEntity.phone,
-                role = updatedEntity.role,
-                isVerified = updatedEntity.isVerified,
-                createdAt = updatedEntity.createdAt.toString(),
-                updatedAt = updatedEntity.updatedAt.toString()
-            )
+        // Perform a partial update by copying only the updated fields
+        val updatedEntity = user.copy(
+            name = updatedUser.name ?: user.name, // If null, retain the original value
+            phone = updatedUser.phone ?: user.phone
+        )
 
-            ResponseEntity.ok(updatedUserDTO)
+        // Save the updated entity to the database
+        userRepository.save(updatedEntity)
 
-        } catch (e: Exception) {
-            // Catch any unexpected error and return a detailed response
-            val errorDetails = mapOf(
-                "error" to "An error occurred while updating the profile",
-                "message" to e.message,
-                "timestamp" to LocalDateTime.now().toString()
-            )
-            ResponseEntity.status(500).body(errorDetails)
-        }
+        // Return a JSON object as the response
+        val response = mapOf("message" to "Profile updated successfully")
+        return ResponseEntity.ok(response)
     }
 
 
+
+    /**
+     * Deactivate the logged-in user's account (soft delete).
+     */
     @DeleteMapping("/me")
     fun deleteUser(): ResponseEntity<String> {
         val username = SecurityContextHolder.getContext().authentication.name
 
         val user = userRepository.findByEmail(username)
-            ?: return ResponseEntity.status(404).body("User not found")
+            ?: throw NoSuchElementException("User with email $username not found")
 
-        // Perform a soft delete
         userRepository.save(user.copy(isActive = false))
 
         return ResponseEntity.ok("User deactivated successfully")
     }
 
+    /**
+     * Mapping function: User -> UserResponseDTO
+     */
+    private fun toUserResponseDTO(user: User): UserResponseDTO {
+        return UserResponseDTO(
+            id = user.id!!,
+            email = user.email,
+            name = user.name,
+            phone = user.phone
+        )
+    }
+
+    /**
+     * Mapping function: UserUpdateDTO -> User (Partial Update)
+     */
+    private fun updateUserFromDTO(user: User, userUpdateDTO: UserUpdateDTO): User {
+        return user.copy(
+            name = userUpdateDTO.name ?: user.name,
+            phone = userUpdateDTO.phone ?: user.phone
+        )
+    }
 }

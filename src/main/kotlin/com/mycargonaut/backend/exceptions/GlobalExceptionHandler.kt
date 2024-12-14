@@ -2,6 +2,7 @@ package com.mycargonaut.backend.exceptions
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -10,6 +11,20 @@ import java.time.LocalDateTime
 
 @ControllerAdvice
 class GlobalExceptionHandler {
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleJsonParseError(ex: HttpMessageNotReadableException): ResponseEntity<Map<String, Any>> {
+        val detailedMessage = ex.cause?.message ?: ex.message ?: "Invalid JSON format"
+
+        val response: Map<String, Any> = mapOf(
+            "timestamp" to LocalDateTime.now(),
+            "status" to HttpStatus.BAD_REQUEST.value(),
+            "error" to "Malformed JSON",
+            "message" to detailedMessage
+        )
+        return ResponseEntity(response, HttpStatus.BAD_REQUEST)
+    }
+
 
     // Handle validation errors (e.g., for @Valid DTOs)
     @ExceptionHandler(MethodArgumentNotValidException::class)
