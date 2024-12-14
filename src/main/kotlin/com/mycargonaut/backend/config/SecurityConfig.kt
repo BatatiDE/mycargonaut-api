@@ -33,7 +33,8 @@ class SecurityConfig(
             .csrf { it.disable() }
             .cors { it.configurationSource(corsConfigurationSource()) }
             .authorizeHttpRequests {
-                it.requestMatchers("/api/register", "/api/login").permitAll()
+                it.requestMatchers("/api/register", "/api/login").permitAll() // Public routes
+                    .requestMatchers("/api/users/**").authenticated()         // Protected user routes
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
