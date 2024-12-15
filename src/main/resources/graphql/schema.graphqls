@@ -1,28 +1,89 @@
+# ===========================
+# Trip Type Definitions
+# ===========================
+# Represents a trip in the system
 type Trip {
-    id: ID!
-    driverId: ID!
-    startPoint: String!
-    destinationPoint: String!
-    date: String!
-    time: String!
-    availableSpace: Int!
-    createdAt: String!
-    updatedAt: String!
+    id: ID!                      # Unique identifier for the trip
+    driverId: ID!                # ID of the driver who created the trip
+    startPoint: String!          # Starting location of the trip
+    destinationPoint: String!    # Destination location of the trip
+    date: String!                # Date of the trip (format: YYYY-MM-DD)
+    time: String!                # Time of the trip (format: HH:mm)
+    availableSpace: Int!         # Number of available spaces for passengers or packages
+    createdAt: String!           # Timestamp for when the trip was created
+    updatedAt: String!           # Timestamp for when the trip was last updated
 }
 
+# ===========================
+# Input Types
+# ===========================
+# Input type for adding a new trip
 input AddTripInput {
-    driverId: ID!
-    startPoint: String!
-    destinationPoint: String!
-    date: String!
-    time: String!
-    availableSpace: Int!
+    driverId: ID!                # ID of the driver who is adding the trip
+    startPoint: String!          # Starting location of the trip
+    destinationPoint: String!    # Destination location of the trip
+    date: String!                # Date of the trip (format: YYYY-MM-DD)
+    time: String!                # Time of the trip (format: HH:mm)
+    availableSpace: Int!         # Number of available spaces for passengers or packages
 }
 
-type Mutation {
-    addTrip(input: AddTripInput!): Trip
-}
-
+# ===========================
+# Query Type Definitions
+# ===========================
+# Queries for retrieving trip data
 type Query {
-    getTrips: [Trip!]!
+    # Fetches all available trips
+    getTrips: [Trip!]!           # Returns a list of all trips
 }
+
+# ===========================
+# Mutation Type Definitions
+# ===========================
+# Mutations for modifying trip and booking data
+type Mutation {
+    # Adds a new trip to the system
+    addTrip(input: AddTripInput!): Trip      # Returns the newly added trip
+
+    # Books a trip for the current user
+    bookTrip(tripId: ID!): BookingResponse! # Returns the booking response
+
+    confirmBooking(bookingId: ID!): BookingResponse # New mutation for confirming a booking
+
+    updateUserRole(userId: ID!, role: String!): User
+
+
+}
+
+# ===========================
+# Booking Type Definitions
+# ===========================
+# Represents a booking for a trip
+# Represents a booking for a trip
+type Booking {
+    id: ID!                # Unique identifier for the booking
+    userId: ID!            # ID of the user who made the booking
+    tripId: ID!            # ID of the trip being booked
+    status: String!        # Status of the booking (e.g., Booked, Cancelled)
+    createdAt: String!     # Timestamp when the booking was created
+}
+
+
+# ===========================
+# Response Types
+# ===========================
+# Response for booking a trip
+type BookingResponse {
+    success: Boolean!            # Whether the booking was successful
+    message: String!             # Details about the booking operation
+    booking: Booking             # The resulting booking if successful
+}
+
+
+type User {
+    id: ID!
+    email: String!
+    role: String!
+    name: String
+}
+
+
