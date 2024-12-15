@@ -19,6 +19,14 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        val path = request.servletPath
+
+        // Exclude /graphql during development mode
+        if (isGraphQLPathExcluded(path)) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
         val authHeader = request.getHeader("Authorization")
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response)
@@ -32,6 +40,19 @@ class JwtAuthenticationFilter(
             auth.details = WebAuthenticationDetailsSource().buildDetails(request)
             SecurityContextHolder.getContext().authentication = auth
         }
+
         filterChain.doFilter(request, response)
+    }
+
+    // Helper method to check if the request should bypass JWT validation
+    private fun isGraphQLPathExcluded(path: String): Boolean {
+        return path == "/graphql" && isDevelopmentMode()
+    }
+
+    private fun isDevelopmentMode(): Boolean {
+        val activeProfile = System.getProperty("spring.profiles.active")
+            ?: System.getenv("SPRING_PROFILES_ACTIVE")
+            ?: "prod"
+        return activeProfile == "dev"
     }
 }

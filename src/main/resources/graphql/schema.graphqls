@@ -1,0 +1,28 @@
+type Trip {
+    id: ID!
+    driverId: ID!
+    startPoint: String!
+    destinationPoint: String!
+    date: String!
+    time: String!
+    availableSpace: Int!
+    createdAt: String!
+    updatedAt: String!
+}
+
+input AddTripInput {
+    driverId: ID!
+    startPoint: String!
+    destinationPoint: String!
+    date: String!
+    time: String!
+    availableSpace: Int!
+}
+
+type Mutation {
+    addTrip(input: AddTripInput!): Trip
+}
+
+type Query {
+    getTrips: [Trip!]!
+}

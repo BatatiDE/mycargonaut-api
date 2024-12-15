@@ -34,7 +34,9 @@ class SecurityConfig(
             .cors { it.configurationSource(corsConfigurationSource()) }
             .authorizeHttpRequests {
                 it.requestMatchers("/api/register", "/api/login").permitAll() // Public routes
+                    .requestMatchers("/graphql").permitAll() // Temporarily allow /graphql for development
                     .requestMatchers("/api/users/**").authenticated()         // Protected user routes
+                    .requestMatchers("/graphql/**").authenticated() // Secure GraphQL in production
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
