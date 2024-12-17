@@ -40,8 +40,26 @@ class TripController(
     }
 
     // Query: Get all trips
+  //  fun getTrips(): List<Trip> = tripRepository.findAll()
+
     @QueryMapping
-    fun getTrips(): List<Trip> = tripRepository.findAll()
+    fun getTrips(): List<Map<String, Any>> {
+        val trips = tripRepository.findAll()
+        return trips.map { trip ->
+            mapOf(
+                "id" to (trip.id ?: 0L), // Ensure non-null id
+                "driverId" to (trip.driver.id ?: 0L), // Ensure non-null driverId
+                "startPoint" to trip.startPoint,
+                "destinationPoint" to trip.destinationPoint,
+                "date" to trip.date,
+                "time" to trip.time,
+                "availableSpace" to trip.availableSpace
+            )
+        }
+    }
+
+
+
 
     // Mutation: Book a trip
     @MutationMapping
