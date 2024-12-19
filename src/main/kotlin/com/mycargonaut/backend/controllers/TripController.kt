@@ -53,7 +53,10 @@ class TripController(
                 "destinationPoint" to trip.destinationPoint,
                 "date" to trip.date,
                 "time" to trip.time,
-                "availableSpace" to trip.availableSpace
+                "availableSpace" to trip.availableSpace,
+                "total_capacity" to trip.totalCapacity, // Ensure this field is included
+                "status" to trip.status // Include status
+
             )
         }
     }
