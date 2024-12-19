@@ -28,7 +28,6 @@ input AddTripInput {
     date: String!                # Date of the trip (format: YYYY-MM-DD)
     time: String!                # Time of the trip (format: HH:mm)
     availableSpace: Int!         # Number of available spaces for passengers or packages
-    total_capacity: Int!          # Total number of spaces for the trip
 
 }
 
