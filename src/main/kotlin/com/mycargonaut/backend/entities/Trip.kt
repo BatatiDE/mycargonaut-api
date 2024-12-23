@@ -39,9 +39,6 @@ data class Trip(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     var updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
-    // Explicitly expose driverId
-    val driverId: Long
-        get() = driver.id!!
 
     @PreUpdate
     fun preUpdate() {

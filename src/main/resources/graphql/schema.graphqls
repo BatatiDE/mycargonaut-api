@@ -14,6 +14,8 @@ type Trip {
     createdAt: String!           # Timestamp for when the trip was created
     updatedAt: String!           # Timestamp for when the trip was last updated
     status: String!              # Status of the trip (e.g., SCHEDULED, ONGOING, COMPLETED, CANCELED)
+    bookedUsers: [Booking!]!     # Fetch bookings for the trip
+
 
 }
 

@@ -55,7 +55,15 @@ class TripController(
                 "time" to trip.time,
                 "availableSpace" to trip.availableSpace,
                 "total_capacity" to trip.totalCapacity, // Ensure this field is included
-                "status" to trip.status // Include status
+                "status" to trip.status,// Include status
+                "bookedUsers" to bookingRepository.findByTrip(trip).map { booking ->
+                    mapOf(
+                        "id" to booking.id,
+                        "userId" to booking.user.id,
+                        "status" to booking.status,
+                        "createdAt" to booking.createdAt
+                    )
+                }
 
             )
         }
