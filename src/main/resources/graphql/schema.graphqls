@@ -57,6 +57,7 @@ type Mutation {
 
     updateUserRole(userId: ID!, role: String!): User
 
+    startOngoing(tripId: ID!): Trip!
 
 }
 

@@ -2,6 +2,7 @@ package com.mycargonaut.backend.controllers
 
 import com.mycargonaut.backend.entities.Booking
 import com.mycargonaut.backend.entities.Trip
+import com.mycargonaut.backend.entities.TripStatus
 import com.mycargonaut.backend.repositories.BookingRepository
 import com.mycargonaut.backend.repositories.TripRepository
 import com.mycargonaut.backend.repositories.UserRepository
@@ -131,6 +132,20 @@ class TripController(
         )
     }
 
+    @MutationMapping
+    fun startOngoing(@Argument tripId: Long): Trip {
+        val trip = tripRepository.findById(tripId)
+            .orElseThrow { IllegalArgumentException("Trip not found") }
+
+        if (trip.status != TripStatus.SCHEDULED) {
+            throw IllegalArgumentException("Only scheduled trips can be started")
+        }
+
+        trip.status = TripStatus.ONGOING
+        tripRepository.save(trip)
+
+        return trip
+    }
 
     @MutationMapping
     fun updateUserRole(@Argument userId: Long, @Argument role: String): User {
