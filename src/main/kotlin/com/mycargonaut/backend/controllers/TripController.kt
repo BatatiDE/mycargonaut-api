@@ -148,6 +148,22 @@ class TripController(
     }
 
     @MutationMapping
+    fun completeTrip(@Argument tripId: Long): Trip {
+        val trip = tripRepository.findById(tripId)
+            .orElseThrow { IllegalArgumentException("Trip not found") }
+
+        if (trip.status != TripStatus.ONGOING) {
+            throw IllegalArgumentException("Only ongoing trips can be completed")
+        }
+
+        trip.status = TripStatus.COMPLETED
+        tripRepository.save(trip)
+
+        return trip
+    }
+
+
+    @MutationMapping
     fun updateUserRole(@Argument userId: Long, @Argument role: String): User {
         val user = userRepository.findById(userId)
             .orElseThrow { IllegalArgumentException("User not found") }

@@ -59,6 +59,9 @@ type Mutation {
 
     startOngoing(tripId: ID!): Trip!
 
+    completeTrip(tripId: ID!): Trip
+
+
 }
 
 # ===========================
