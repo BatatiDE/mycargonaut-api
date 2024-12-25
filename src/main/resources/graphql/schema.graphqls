@@ -40,6 +40,15 @@ input AddTripInput {
 type Query {
     # Fetches all available trips
     getTrips: [Trip!]!           # Returns a list of all trips
+
+    getAllRatings: [Rating!]!
+
+    getAverageRatingByUser(userId: ID!): Float!
+
+
+    getAllReviews: [Review!]!
+    getReviewsByTrip(tripId: ID!): [Review!]!
+
 }
 
 # ===========================
@@ -60,6 +69,11 @@ type Mutation {
     startOngoing(tripId: ID!): Trip!
 
     completeTrip(tripId: ID!): Trip
+
+    addRating(userId: ID!, tripId: ID!, ratingValue: Float!): Rating!
+
+    addReview(userId: ID!, tripId: ID!, reviewText: String!): Review!
+
 
 
 }
@@ -95,5 +109,43 @@ type User {
     role: String!
     name: String
 }
+
+# ===========================
+# Review Type Definitions
+# ===========================
+# Response for review a trip
+
+type Review {
+    id: ID!
+    user: User!
+    trip: Trip!
+    reviewText: String!
+    flagCount: Int!
+    status: ReviewStatus!
+}
+
+enum ReviewStatus {
+    APPROVED
+    FLAGGED
+}
+
+
+
+# ===========================
+# Rating Type Definitions
+# ===========================
+# Response for rating a trip
+
+type Rating {
+    id: ID!
+    user: User!
+    trip: Trip!
+    ratingValue: Float!
+}
+
+
+
+
+
 
 
