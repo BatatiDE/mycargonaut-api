@@ -70,7 +70,7 @@ type Mutation {
 
     completeTrip(tripId: ID!): Trip
 
-    addRating(userId: ID!, tripId: ID!, ratingValue: Float!): Rating!
+    addRating(voterId: ID!, userId: ID!, tripId: ID!, ratingValue: Float!): Rating!
 
     addReview(userId: ID!, tripId: ID!, reviewText: String!): Review!
 
@@ -137,11 +137,13 @@ enum ReviewStatus {
 # Response for rating a trip
 
 type Rating {
-    id: ID!
-    user: User!
-    trip: Trip!
-    ratingValue: Float!
+    id: ID!                   # Unique identifier for the rating
+    user: User!               # The user being rated (e.g., driver or passenger)
+    voter: User!              # The user submitting the rating
+    trip: Trip!               # The trip associated with the rating
+    ratingValue: Float!       # The value of the rating
 }
+
 
 
 

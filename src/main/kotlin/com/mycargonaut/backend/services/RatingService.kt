@@ -12,25 +12,32 @@ class RatingService(
     private val userRepository: UserRepository,
     private val tripRepository: TripRepository
 ) {
-    fun addRating(userId: Long, tripId: Long, ratingValue: Float): Rating {
+    fun addRating(voterId: Long, userId: Long, tripId: Long, ratingValue: Float): Rating {
+        val voter = userRepository.findById(voterId).orElseThrow {
+            IllegalArgumentException("Voter not found with ID: $voterId")
+        }
         val user = userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User not found with ID: $userId")
         }
         val trip = tripRepository.findById(tripId).orElseThrow {
             IllegalArgumentException("Trip not found with ID: $tripId")
         }
-        val existingRating = ratingRepository.findByUserIdAndTripId(userId, tripId)
+
+        // Check for existing rating
+        val existingRating = ratingRepository.findByUserIdAndTripIdAndVoterId(userId, tripId, voterId)
         if (existingRating != null) {
-            throw IllegalArgumentException("You have already rated this trip.")
+            throw IllegalArgumentException("You have already rated this user for this trip.")
         }
 
         val newRating = Rating(
             user = user,
+            voter = voter,
             trip = trip,
             ratingValue = ratingValue
         )
         return ratingRepository.save(newRating)
     }
+
 
     fun getAllRatings(): List<Rating> {
         return ratingRepository.findAll()

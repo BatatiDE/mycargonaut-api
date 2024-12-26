@@ -13,17 +13,19 @@ class RatingController(private val service: RatingService) {
 
     @MutationMapping
     fun addRating(
-        @Argument userId: Long,
-        @Argument tripId: Long,
-        @Argument ratingValue: Float
+        @Argument voterId: Long,      // The user submitting the rating
+        @Argument userId: Long,       // The user being rated
+        @Argument tripId: Long,       // The trip associated with the rating
+        @Argument ratingValue: Float  // The rating value
     ): Rating {
         return try {
-            service.addRating(userId, tripId, ratingValue)
+            service.addRating(voterId, userId, tripId, ratingValue)
         } catch (ex: Exception) {
             // Throw the original exception without masking it
             throw GraphQLException("Error adding rating: ${ex.message}", ex)
         }
     }
+
 
 
     @QueryMapping

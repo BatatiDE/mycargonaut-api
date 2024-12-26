@@ -4,6 +4,6 @@ import com.mycargonaut.backend.entities.Rating
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface RatingRepository : JpaRepository<Rating, Long> {
-    fun findByUserIdAndTripId(userId: Long, tripId: Long): Rating?
+    fun findByUserIdAndTripIdAndVoterId(userId: Long, tripId: Long, voterId: Long): Rating?
     fun findByUserId(userId: Long): List<Rating>
 }
