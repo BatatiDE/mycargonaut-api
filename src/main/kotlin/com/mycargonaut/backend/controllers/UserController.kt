@@ -43,7 +43,8 @@ class UserController(
 
         // Perform a partial update by copying only the updated fields
         val updatedEntity = user.copy(
-            name = updatedUser.name ?: user.name, // If null, retain the original value
+            firstName = updatedUser.firstName ?: user.firstName, // If null, retain the original value
+            lastName = updatedUser.lastName ?: user.lastName,
             phone = updatedUser.phone ?: user.phone
         )
 
@@ -79,7 +80,8 @@ class UserController(
         return UserResponseDTO(
             id = user.id!!,
             email = user.email,
-            name = user.name,
+            firstName = user.firstName,
+            lastName = user.lastName,
             phone = user.phone
         )
     }
@@ -89,7 +91,8 @@ class UserController(
      */
     private fun updateUserFromDTO(user: User, userUpdateDTO: UserUpdateDTO): User {
         return user.copy(
-            name = userUpdateDTO.name ?: user.name,
+            firstName = userUpdateDTO.firstName ?: user.firstName,
+            lastName = userUpdateDTO.lastName ?: user.lastName,
             phone = userUpdateDTO.phone ?: user.phone
         )
     }

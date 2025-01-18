@@ -10,10 +10,13 @@ data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-
+    val firstName: String,
+    val lastName: String,
     val email: String,
     val password: String,
-    val name: String? = null,
+    val picture: String,
+    var rating: Double,
+    var numRides: Int,
     val birthdate: LocalDate? = null,
     val phone: String? = null,
     var role: String = "USER",

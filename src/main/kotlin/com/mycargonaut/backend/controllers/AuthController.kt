@@ -49,7 +49,8 @@ class AuthController(
             val userDTO = UserResponseDTO(
                 id = foundUser.id!!,
                 email = foundUser.email,
-                name = foundUser.name,
+                firstName = foundUser.firstName,
+                lastName = foundUser.lastName,
                 phone = foundUser.phone,
             )
 
