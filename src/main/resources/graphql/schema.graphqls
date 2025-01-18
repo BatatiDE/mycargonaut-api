@@ -5,18 +5,26 @@
 type Trip {
     id: ID!                      # Unique identifier for the trip
     driverId: ID!                # ID of the driver who created the trip
-    startPoint: String!          # Starting location of the trip
+    startingPoint: String!          # Starting location of the trip
     destinationPoint: String!    # Destination location of the trip
     date: String!                # Date of the trip (format: YYYY-MM-DD)
     time: String!                # Time of the trip (format: HH:mm)
-    availableSpace: Int!         # Number of available spaces for passengers or packages
-    total_capacity: Int!          # Total number of spaces for the trip
+    availableSeats: Int!         # Number of available spaces for passengers or packages
+    freightSpace: Float!         # Freight space available for the trip
+    price: Float!                # Price of the trip
+    isFreightRide: Boolean!      # Whether the trip is a freight ride
     createdAt: String!           # Timestamp for when the trip was created
     updatedAt: String!           # Timestamp for when the trip was last updated
     status: String!              # Status of the trip (e.g., SCHEDULED, ONGOING, COMPLETED, CANCELED)
     bookedUsers: [Booking!]!     # Fetch bookings for the trip
+    type: TripType!             # Type of the trip (e.g., OFFER, REUQEST)
 
 
+}
+
+enum TripType {
+    OFFER,
+    REQUEST
 }
 
 # ===========================
@@ -29,7 +37,10 @@ input AddTripInput {
     destinationPoint: String!    # Destination location of the trip
     date: String!                # Date of the trip (format: YYYY-MM-DD)
     time: String!                # Time of the trip (format: HH:mm)
-    availableSpace: Int!         # Number of available spaces for passengers or packages
+    availableSeats: Int!         # Number of available spaces for passengers or packages
+    freightSpace: Float!         # Freight space available for the trip
+    price: Float!                # Price of the trip
+    isFreightRide: Boolean!      # Whether the trip is a freight ride
 
 }
 

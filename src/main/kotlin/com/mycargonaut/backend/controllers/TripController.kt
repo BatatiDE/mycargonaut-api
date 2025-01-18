@@ -3,6 +3,7 @@ package com.mycargonaut.backend.controllers
 import com.mycargonaut.backend.entities.Booking
 import com.mycargonaut.backend.entities.Trip
 import com.mycargonaut.backend.entities.TripStatus
+import com.mycargonaut.backend.entities.TripType
 import com.mycargonaut.backend.repositories.BookingRepository
 import com.mycargonaut.backend.repositories.TripRepository
 import com.mycargonaut.backend.repositories.UserRepository
@@ -37,7 +38,8 @@ class TripController(
             freightSpace = input.freightSpace,
             isFreightRide = input.isFreightRide,
             vehicle = input.vehicle,
-            notes = input.notes
+            notes = input.notes,
+            type = input.type
         )
 
         return tripRepository.save(trip)
@@ -61,6 +63,7 @@ class TripController(
                 "vehicle" to trip.vehicle,
                 "notes" to trip.notes,
                 "status" to trip.status,
+                "type" to trip.type,
                 "bookedUsers" to bookingRepository.findByTrip(trip).map { booking ->
                     mapOf(
                         "id" to booking.id,
@@ -91,38 +94,39 @@ class TripController(
                 "isFreightRide" to trip.isFreightRide,
                 "vehicle" to trip.vehicle,
                 "notes" to trip.notes,
-                "status" to trip.status
+                "status" to trip.status,
+                "type" to trip.type
             )
         }
     }
 
     @MutationMapping
     fun bookTrip(@Argument tripId: Long, @Argument seats: Int = 1, @Argument freightSpace: Double = 0.0): BookingResponse {
-        val username = SecurityContextHolder.getContext().authentication.name
-        val user = userRepository.findByEmail(username)
-            ?: throw IllegalArgumentException("User not found")
+         val username = SecurityContextHolder.getContext().authentication.name
+                val user = userRepository.findByEmail(username)
+                    ?: throw IllegalArgumentException("User not found")
 
-        val trip = tripRepository.findById(tripId)
-            .orElseThrow { IllegalArgumentException("Trip not found") }
+                val trip = tripRepository.findById(tripId)
+                    .orElseThrow { IllegalArgumentException("Trip not found") }
 
-        if (trip.availableSeats < seats || trip.freightSpace < freightSpace) {
-            return BookingResponse(
-                success = false,
-                message = "Not enough available space for this trip",
-                booking = null
-            )
-        }
+                if (trip.availableSeats <= 0) {
+                    return BookingResponse(
+                        success = false,
+                        message = "No available space for this trip",
+                        booking = null
+                    )
+                }
 
-        trip.availableSeats -= seats
-        trip.freightSpace -= freightSpace
-        val booking = Booking(user = user, trip = trip, seats = seats, freightSpace = freightSpace)
-        bookingRepository.save(booking)
-        tripRepository.save(trip)
+                // Reduce available space and save booking
+                trip.availableSeats -= 1
+                val booking = Booking(user = user, trip = trip)
+                bookingRepository.save(booking)
+                tripRepository.save(trip)
 
-        return BookingResponse(
-            success = true,
-            message = "Trip booked successfully",
-            booking = booking
+                return BookingResponse(
+                    success = true,
+                    message = "Trip booked successfully",
+                    booking = booking
         )
     }
 
@@ -185,7 +189,8 @@ data class AddTripInput(
     val freightSpace: Double,
     val isFreightRide: Boolean,
     val vehicle: String,
-    val notes: String
+    val notes: String,
+    val type: TripType
 )
 
 data class BookingResponse(

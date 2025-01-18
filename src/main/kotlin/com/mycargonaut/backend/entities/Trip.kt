@@ -24,6 +24,9 @@ data class Trip(
     val notes: String,
 
     @Enumerated(EnumType.STRING)
+    val type: TripType,
+
+    @Enumerated(EnumType.STRING)
     var status: TripStatus = TripStatus.SCHEDULED,
 
     @ManyToMany
@@ -52,5 +55,10 @@ enum class TripStatus {
     COMPLETED,
     CANCELED,
     DELAYED
+}
+
+enum class TripType{
+    OFFER,
+    REQUEST
 }
 
