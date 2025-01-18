@@ -12,6 +12,7 @@ import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
 import org.springframework.security.core.context.SecurityContextHolder
+import java.time.LocalDateTime
 
 @Controller
 class TripController(
@@ -20,7 +21,6 @@ class TripController(
     private val bookingRepository: BookingRepository
 ) {
 
-    // Mutation: Add a new trip
     @MutationMapping
     fun addTrip(@Argument input: AddTripInput): Trip {
         val driver: User = userRepository.findById(input.driverId)
@@ -28,35 +28,39 @@ class TripController(
 
         val trip = Trip(
             driver = driver,
-            startPoint = input.startPoint,
+            startingPoint = input.startingPoint,
             destinationPoint = input.destinationPoint,
             date = input.date,
             time = input.time,
-            totalCapacity = input.availableSpace,
-            availableSpace = input.availableSpace
-
+            price = input.price,
+            availableSeats = input.availableSeats,
+            freightSpace = input.freightSpace,
+            isFreightRide = input.isFreightRide,
+            vehicle = input.vehicle,
+            notes = input.notes
         )
 
         return tripRepository.save(trip)
     }
-
-    // Query: Get all trips
-  //  fun getTrips(): List<Trip> = tripRepository.findAll()
 
     @QueryMapping
     fun getTrips(): List<Map<String, Any>> {
         val trips = tripRepository.findAll()
         return trips.map { trip ->
             mapOf(
-                "id" to (trip.id ?: 0L), // Ensure non-null id
-                "driverId" to (trip.driver.id ?: 0L), // Ensure non-null driverId
-                "startPoint" to trip.startPoint,
+                "id" to (trip.id ?: 0L),
+                "driverId" to (trip.driver.id ?: 0L),
+                "startingPoint" to trip.startingPoint,
                 "destinationPoint" to trip.destinationPoint,
                 "date" to trip.date,
                 "time" to trip.time,
-                "availableSpace" to trip.availableSpace,
-                "total_capacity" to trip.totalCapacity, // Ensure this field is included
-                "status" to trip.status,// Include status
+                "price" to trip.price,
+                "availableSeats" to trip.availableSeats,
+                "freightSpace" to trip.freightSpace,
+                "isFreightRide" to trip.isFreightRide,
+                "vehicle" to trip.vehicle,
+                "notes" to trip.notes,
+                "status" to trip.status,
                 "bookedUsers" to bookingRepository.findByTrip(trip).map { booking ->
                     mapOf(
                         "id" to booking.id,
@@ -65,17 +69,35 @@ class TripController(
                         "createdAt" to booking.createdAt
                     )
                 }
-
             )
         }
     }
 
+    @QueryMapping
+    fun getUpcomingTrips(): List<Map<String, Any>> {
+        val now = LocalDateTime.now()
+        val trips = tripRepository.findByDateAfterAndStatusIn(now, listOf(TripStatus.SCHEDULED, TripStatus.APPROACHING))
+        return trips.map { trip ->
+            mapOf(
+                "id" to (trip.id ?: 0L),
+                "driverId" to (trip.driver.id ?: 0L),
+                "startingPoint" to trip.startingPoint,
+                "destinationPoint" to trip.destinationPoint,
+                "date" to trip.date,
+                "time" to trip.time,
+                "price" to trip.price,
+                "availableSeats" to trip.availableSeats,
+                "freightSpace" to trip.freightSpace,
+                "isFreightRide" to trip.isFreightRide,
+                "vehicle" to trip.vehicle,
+                "notes" to trip.notes,
+                "status" to trip.status
+            )
+        }
+    }
 
-
-
-    // Mutation: Book a trip
     @MutationMapping
-    fun bookTrip(@Argument tripId: Long): BookingResponse {
+    fun bookTrip(@Argument tripId: Long, @Argument seats: Int = 1, @Argument freightSpace: Double = 0.0): BookingResponse {
         val username = SecurityContextHolder.getContext().authentication.name
         val user = userRepository.findByEmail(username)
             ?: throw IllegalArgumentException("User not found")
@@ -83,17 +105,17 @@ class TripController(
         val trip = tripRepository.findById(tripId)
             .orElseThrow { IllegalArgumentException("Trip not found") }
 
-        if (trip.availableSpace <= 0) {
+        if (trip.availableSeats < seats || trip.freightSpace < freightSpace) {
             return BookingResponse(
                 success = false,
-                message = "No available space for this trip",
+                message = "Not enough available space for this trip",
                 booking = null
             )
         }
 
-        // Reduce available space and save booking
-        trip.availableSpace -= 1
-        val booking = Booking(user = user, trip = trip)
+        trip.availableSeats -= seats
+        trip.freightSpace -= freightSpace
+        val booking = Booking(user = user, trip = trip, seats = seats, freightSpace = freightSpace)
         bookingRepository.save(booking)
         tripRepository.save(trip)
 
@@ -112,9 +134,6 @@ class TripController(
         val driver = userRepository.findByEmail(username)
             ?: throw IllegalArgumentException("Driver not found. Username: $username")
 
-
-        println("Driver found: ${driver.email} with ID ${driver.id}")
-
         val booking = bookingRepository.findById(bookingId)
             .orElseThrow { IllegalArgumentException("Booking not found for ID: $bookingId") }
 
@@ -122,46 +141,24 @@ class TripController(
             throw IllegalArgumentException("You are not authorized to confirm this booking")
         }
 
-        booking.status = "Confirmed"
-        bookingRepository.save(booking)
+        val updatedBooking = booking.copy(status = "Confirmed")
+        bookingRepository.save(updatedBooking)
 
         return BookingResponse(
             success = true,
             message = "Booking confirmed successfully",
-            booking = booking
+            booking = updatedBooking
         )
     }
 
     @MutationMapping
-    fun startOngoing(@Argument tripId: Long): Trip {
+    fun updateTripStatus(@Argument tripId: Long, @Argument status: TripStatus): Trip {
         val trip = tripRepository.findById(tripId)
             .orElseThrow { IllegalArgumentException("Trip not found") }
 
-        if (trip.status != TripStatus.SCHEDULED) {
-            throw IllegalArgumentException("Only scheduled trips can be started")
-        }
-
-        trip.status = TripStatus.ONGOING
-        tripRepository.save(trip)
-
-        return trip
+        trip.status = status
+        return tripRepository.save(trip)
     }
-
-    @MutationMapping
-    fun completeTrip(@Argument tripId: Long): Trip {
-        val trip = tripRepository.findById(tripId)
-            .orElseThrow { IllegalArgumentException("Trip not found") }
-
-        if (trip.status != TripStatus.ONGOING) {
-            throw IllegalArgumentException("Only ongoing trips can be completed")
-        }
-
-        trip.status = TripStatus.COMPLETED
-        tripRepository.save(trip)
-
-        return trip
-    }
-
 
     @MutationMapping
     fun updateUserRole(@Argument userId: Long, @Argument role: String): User {
@@ -172,28 +169,27 @@ class TripController(
             throw IllegalArgumentException("Invalid role provided: $role")
         }
 
-        user.role = role
-        return userRepository.save(user)
+        val updatedUser = user.copy(role = role)
+        return userRepository.save(updatedUser)
     }
-
-
-
 }
 
-// Input type for adding a new trip
 data class AddTripInput(
     val driverId: Long,
-    val startPoint: String,
+    val startingPoint: String,
     val destinationPoint: String,
-    val date: String,
+    val date: LocalDateTime,
     val time: String,
-    val availableSpace: Int
+    val price: Double,
+    val availableSeats: Int,
+    val freightSpace: Double,
+    val isFreightRide: Boolean,
+    val vehicle: String,
+    val notes: String
 )
 
-// Response for booking a trip
 data class BookingResponse(
     val success: Boolean,
     val message: String,
     val booking: Booking?
 )
-

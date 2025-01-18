@@ -12,19 +12,17 @@ data class Trip(
     @ManyToOne
     @JoinColumn(name = "driver_id", nullable = false)
     val driver: User,
-
-    val startPoint: String,
+    val startingPoint: String,
     val destinationPoint: String,
-    val date: String,
+    val date: LocalDateTime,
     val time: String,
+    val price: Double,
+    var availableSeats: Int,
+    var freightSpace: Double,
+    val isFreightRide: Boolean,
+    val vehicle: String,
+    val notes: String,
 
-    // Total capacity of the trip
-    val totalCapacity: Int,
-
-    // Available space (mutable for booking updates)
-    var availableSpace: Int,
-
-    // Status of the trip
     @Enumerated(EnumType.STRING)
     var status: TripStatus = TripStatus.SCHEDULED,
 
@@ -46,10 +44,13 @@ data class Trip(
     }
 }
 
-// Enum for trip status
 enum class TripStatus {
     SCHEDULED,
-    ONGOING,
+    APPROACHING,
+    ARRIVED,
+    IN_PROGRESS,
     COMPLETED,
-    CANCELED
+    CANCELED,
+    DELAYED
 }
+
