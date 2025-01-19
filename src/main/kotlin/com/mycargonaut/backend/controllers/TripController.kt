@@ -199,8 +199,8 @@ data class AddTripInput(
     val availableSeats: Int,
     val freightSpace: Double,
     val isFreightRide: Boolean,
-    val vehicle: String?,  // Make vehicle nullable
-    val notes: String?,    // Make notes nullable
+    val vehicle: String,
+    val notes: String,
     val type: TripType
 )
 
