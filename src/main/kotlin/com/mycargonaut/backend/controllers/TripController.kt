@@ -13,7 +13,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
 import org.springframework.security.core.context.SecurityContextHolder
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Controller
 class TripController(
@@ -27,23 +30,31 @@ class TripController(
         val driver: User = userRepository.findById(input.driverId)
             .orElseThrow { IllegalArgumentException("Driver not found") }
 
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+        val date = LocalDate.parse(input.date, dateFormatter)
+        val time = LocalTime.parse(input.time, timeFormatter)
+        val dateTime = LocalDateTime.of(date, time)
+
         val trip = Trip(
-            driver = driver,
-            startingPoint = input.startingPoint,
-            destinationPoint = input.destinationPoint,
-            date = input.date,
-            time = input.time,
-            price = input.price,
-            availableSeats = input.availableSeats,
-            freightSpace = input.freightSpace,
-            isFreightRide = input.isFreightRide,
-            vehicle = input.vehicle,
-            notes = input.notes,
-            type = input.type
-        )
+                driver = driver,
+                startingPoint = input.startingPoint,
+                destinationPoint = input.destinationPoint,
+                date = dateTime,
+                time = input.time,
+                price = input.price,
+                availableSeats = input.availableSeats,
+                freightSpace = input.freightSpace,
+                isFreightRide = input.isFreightRide,
+                vehicle = input.vehicle ?: "",  // Provide a default empty string if vehicle is null
+                notes = input.notes ?: "",      // Provide a default empty string if notes is null
+                type = input.type
+            )
 
         return tripRepository.save(trip)
     }
+
 
     @QueryMapping
     fun getTrips(): List<Map<String, Any>> {
@@ -182,14 +193,14 @@ data class AddTripInput(
     val driverId: Long,
     val startingPoint: String,
     val destinationPoint: String,
-    val date: LocalDateTime,
+    val date: String,
     val time: String,
     val price: Double,
     val availableSeats: Int,
     val freightSpace: Double,
     val isFreightRide: Boolean,
-    val vehicle: String,
-    val notes: String,
+    val vehicle: String?,  // Make vehicle nullable
+    val notes: String?,    // Make notes nullable
     val type: TripType
 )
 

@@ -43,7 +43,7 @@ input AddTripInput {
     freightSpace: Float!         # Freight space available for the trip
     price: Float!                # Price of the trip
     isFreightRide: Boolean!      # Whether the trip is a freight ride
-    vehicle: String         # Vehicle type for the trip
+    vehicle: String        # Vehicle type for the trip
     notes: String                # Additional notes for the trip
     type: TripType!             # Type of the trip (e.g., OFFER, REUQEST)
 
