@@ -18,6 +18,8 @@ type Trip {
     status: String!              # Status of the trip (e.g., SCHEDULED, ONGOING, COMPLETED, CANCELED)
     bookedUsers: [Booking!]!     # Fetch bookings for the trip
     type: TripType!             # Type of the trip (e.g., OFFER, REUQEST)
+    vehicle: String         # Vehicle type for the trip
+    notes: String                # Additional notes for the trip
 
 
 }
@@ -33,7 +35,7 @@ enum TripType {
 # Input type for adding a new trip
 input AddTripInput {
     driverId: ID!                # ID of the driver who is adding the trip
-    startPoint: String!          # Starting location of the trip
+    startingPoint: String!          # Starting location of the trip
     destinationPoint: String!    # Destination location of the trip
     date: String!                # Date of the trip (format: YYYY-MM-DD)
     time: String!                # Time of the trip (format: HH:mm)
@@ -41,6 +43,9 @@ input AddTripInput {
     freightSpace: Float!         # Freight space available for the trip
     price: Float!                # Price of the trip
     isFreightRide: Boolean!      # Whether the trip is a freight ride
+    vehicle: String         # Vehicle type for the trip
+    notes: String                # Additional notes for the trip
+    type: TripType!             # Type of the trip (e.g., OFFER, REUQEST)
 
 }
 
