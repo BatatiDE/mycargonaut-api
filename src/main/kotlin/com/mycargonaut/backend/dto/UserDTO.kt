@@ -1,15 +1,30 @@
 package com.mycargonaut.backend.dto
+import java.time.LocalDate
 
 data class UserResponseDTO(
-    val id: Long,        // Read-only
-    val email: String,   // Read-only
-    val firstName: String?,   // Editable but fetched as part of the response
-    val lastName: String?,   // Editable but fetched as part of the response
-    val phone: String?   // Editable but fetched as part of the response
+   val id: Long,
+       val email: String,
+       val firstName: String?,
+       val lastName: String?,
+       val phone: String?,
+       val picture: String?,
+       val birthdate: LocalDate? = null,
+       val additionalNote: String?,
+       val rating: Double?,
+       val numRides: Int?,
+       val numPassengers: Int?,
+       val weightCarried: Double?,
+       val distanceTraveled: Double?,
+       val languages: List<String>?,
+       val isSmoker: Boolean?
 )
 
 data class UserUpdateDTO(
-    val firstName: String?,   // Editable
-    val lastName: String?,   // Editable
-    val phone: String?   // Editable
+    val firstName: String?,
+        val lastName: String?,
+        val phone: String?,
+        val birthdate: LocalDate?,
+        val additionalNote: String?,
+        val languages: Set<String>?,
+        val isSmoker: Boolean?
 )

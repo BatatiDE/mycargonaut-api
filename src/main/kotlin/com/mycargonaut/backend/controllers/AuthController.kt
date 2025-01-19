@@ -1,7 +1,8 @@
 package com.mycargonaut.backend.controllers
 
 import com.mycargonaut.backend.config.JwtService
-import com.mycargonaut.backend.dto.UserResponseDTO
+import com.mycargonaut.backend.dto.LoginResponseDTO
+import com.mycargonaut.backend.dto.UserBasicInfoDTO
 import com.mycargonaut.backend.entities.User
 import com.mycargonaut.backend.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,17 +46,23 @@ class AuthController(
             // Generate a JWT token
             val token = jwtService.generateToken(foundUser.email)
 
-            // Create a UserDTO for the response
-            val userDTO = UserResponseDTO(
-                id = foundUser.id!!,
-                email = foundUser.email,
-                firstName = foundUser.firstName,
-                lastName = foundUser.lastName,
-                phone = foundUser.phone,
-            )
+            // Create a UserBasicInfoDTO for the response
+                        val userBasicInfo = UserBasicInfoDTO(
+                            id = foundUser.id!!,
+                            email = foundUser.email,
+                            firstName = foundUser.firstName,
+                            lastName = foundUser.lastName
+                        )
 
-            // Return the token and the UserDTO
-            return ResponseEntity.ok(mapOf("token" to token, "user" to userDTO))
+                        // Create the LoginResponseDTO
+                        val loginResponse = LoginResponseDTO(
+                            token = token,
+                            user = userBasicInfo
+                        )
+
+                        // Return the LoginResponseDTO
+                        return ResponseEntity.ok(loginResponse)
+
 
         } catch (e: Exception) {
             return ResponseEntity.status(500).body("Error: ${e.message}")

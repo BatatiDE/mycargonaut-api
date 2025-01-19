@@ -15,85 +15,62 @@ class UserController(
     private val userRepository: UserRepository
 ) {
 
-    /**
-     * Fetch the logged-in user's profile.
-     */
     @GetMapping("/me")
     fun getUserProfile(): ResponseEntity<UserResponseDTO> {
         val username = SecurityContextHolder.getContext().authentication.name
-
         val user = userRepository.findByEmail(username)
             ?: throw NoSuchElementException("User with email $username not found")
-
-        return ResponseEntity.ok(toUserResponseDTO(user))
+        return ResponseEntity.ok(user.toUserResponseDTO())
     }
 
-    /**
-     * Update the logged-in user's profile.
-     */
     @PutMapping("/me")
-    fun updateUserProfile(@RequestBody updatedUser: UserUpdateDTO): ResponseEntity<Map<String, String>> {
+    fun updateUserProfile(@Valid @RequestBody updatedUser: UserUpdateDTO): ResponseEntity<UserResponseDTO> {
         val username = SecurityContextHolder.getContext().authentication.name
-
-        // Log the incoming payload for debugging
-        println("Received payload for update: $updatedUser")
-
         val user = userRepository.findByEmail(username)
             ?: throw NoSuchElementException("User with email $username not found")
 
-        // Perform a partial update by copying only the updated fields
         val updatedEntity = user.copy(
-            firstName = updatedUser.firstName ?: user.firstName, // If null, retain the original value
+            firstName = updatedUser.firstName ?: user.firstName,
             lastName = updatedUser.lastName ?: user.lastName,
-            phone = updatedUser.phone ?: user.phone
-        )
+            phone = updatedUser.phone ?: user.phone,
+            birthdate = updatedUser.birthdate ?: user.birthdate,
+            additionalNote = updatedUser.additionalNote ?: user.additionalNote,
+            isSmoker = updatedUser.isSmoker ?: user.isSmoker
+        ).apply {
+            updatedUser.languages?.let { languages = it.toMutableSet() }
+        }
 
-        // Save the updated entity to the database
-        userRepository.save(updatedEntity)
-
-        // Return a JSON object as the response
-        val response = mapOf("message" to "Profile updated successfully")
-        return ResponseEntity.ok(response)
+        val savedUser = userRepository.save(updatedEntity)
+        return ResponseEntity.ok(savedUser.toUserResponseDTO())
     }
 
-
-
-    /**
-     * Deactivate the logged-in user's account (soft delete).
-     */
     @DeleteMapping("/me")
     fun deleteUser(): ResponseEntity<String> {
         val username = SecurityContextHolder.getContext().authentication.name
-
         val user = userRepository.findByEmail(username)
             ?: throw NoSuchElementException("User with email $username not found")
-
         userRepository.save(user.copy(isActive = false))
-
         return ResponseEntity.ok("User deactivated successfully")
     }
 
-    /**
-     * Mapping function: User -> UserResponseDTO
-     */
-    private fun toUserResponseDTO(user: User): UserResponseDTO {
+    private fun User.toUserResponseDTO(): UserResponseDTO {
         return UserResponseDTO(
-            id = user.id!!,
-            email = user.email,
-            firstName = user.firstName,
-            lastName = user.lastName,
-            phone = user.phone
-        )
-    }
-
-    /**
-     * Mapping function: UserUpdateDTO -> User (Partial Update)
-     */
-    private fun updateUserFromDTO(user: User, userUpdateDTO: UserUpdateDTO): User {
-        return user.copy(
-            firstName = userUpdateDTO.firstName ?: user.firstName,
-            lastName = userUpdateDTO.lastName ?: user.lastName,
-            phone = userUpdateDTO.phone ?: user.phone
+            id = id!!,
+            email = email,
+            firstName = firstName,
+            lastName = lastName,
+            phone = phone,
+            picture = picture,
+            birthdate = birthdate,
+            additionalNote = additionalNote,
+            rating = rating,
+            numRides = numRides,
+            numPassengers = numPassengers,
+            weightCarried = weightCarried,
+            distanceTraveled = distanceTraveled,
+            languages = languages.toList(),
+            isSmoker = isSmoker
         )
     }
 }
+
