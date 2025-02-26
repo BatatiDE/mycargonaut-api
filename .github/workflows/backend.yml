@@ -31,12 +31,10 @@ jobs:
           distribution: temurin
 
       - name: Make gradlew Executable
-        run: |
-          cd backend
+        run:
           chmod +x gradlew
       - name: Lint Backend Code
-        run: |
-          cd backend
+        run:
           ./gradlew check
   test-backend:
     name: Test Backend
@@ -53,10 +51,8 @@ jobs:
           distribution: temurin
 
       - name: Make gradlew Executable
-        run: |
-          cd backend
+        run:
           chmod +x gradlew
       - name: Run Backend Tests
-        run: |
-          cd backend
+        run:
           ./gradlew test
