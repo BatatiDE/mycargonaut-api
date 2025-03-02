@@ -19,16 +19,20 @@ class AuthController(
 
     @PostMapping("/register")
     fun register(@RequestBody user: User): ResponseEntity<String> {
-        if (userRepository.findByEmail(user.email) != null) {
-            return ResponseEntity.status(400).body("Email is already registered")
-        }
+        return try {
+            if (userRepository.findByEmail(user.email) != null) {
+                return ResponseEntity.status(400).body("Email is already registered")
+            }
 
-        val newUser = user.copy(password = passwordEncoder.encode(user.password))
-        userRepository.save(newUser)
-        return ResponseEntity.ok("User registered successfully")
-    }
-
-
+            val newUser = user.copy(
+                password = passwordEncoder.encode(user.password),
+                isActive = true // Standardwert setzen
+            )
+            userRepository.save(newUser)
+            ResponseEntity.ok("User registered successfully")
+        } catch (e: Exception) {
+            ResponseEntity.status(500).body("Error: ${e.message}")
+        } }
 
     @PostMapping("/login")
     fun login(@RequestBody user: User): ResponseEntity<Any> {

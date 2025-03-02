@@ -16,6 +16,7 @@ data class User(
     val phone: String? = null,
     val role: String = "USER",
     val isVerified: Boolean = false,
+    val isActive: Boolean = true,  // HINZUGEFÜGT
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now()
 )
