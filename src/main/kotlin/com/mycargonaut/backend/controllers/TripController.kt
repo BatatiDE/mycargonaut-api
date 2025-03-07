@@ -112,7 +112,8 @@ class TripController(
     }
 
     @MutationMapping
-    fun bookTrip(@Argument tripId: Long, @Argument seats: Int = 1, @Argument freightSpace: Double = 0.0): BookingResponse {
+    fun bookTrip(@Argument tripId: Long, @Argument seats: Int? = 1, @Argument freightSpace:
+    Double? = 0.0): BookingResponse {
          val username = SecurityContextHolder.getContext().authentication.name
                 val user = userRepository.findByEmail(username)
                     ?: throw IllegalArgumentException("User not found")
