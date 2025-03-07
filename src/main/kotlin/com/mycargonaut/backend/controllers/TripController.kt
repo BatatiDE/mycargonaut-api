@@ -112,7 +112,8 @@ class TripController(
     }
 
     @MutationMapping
-    fun bookTrip(@Argument tripId: Long, @Argument seats: Int = 1, @Argument freightSpace: Double = 0.0): BookingResponse {
+    fun bookTrip(@Argument tripId: Long, @Argument seats: Int? = 1, @Argument freightSpace:
+    Double? = 0.0): BookingResponse {
          val username = SecurityContextHolder.getContext().authentication.name
                 val user = userRepository.findByEmail(username)
                     ?: throw IllegalArgumentException("User not found")
@@ -199,8 +200,8 @@ data class AddTripInput(
     val availableSeats: Int,
     val freightSpace: Double,
     val isFreightRide: Boolean,
-    val vehicle: String?,  // Make vehicle nullable
-    val notes: String?,    // Make notes nullable
+    val vehicle: String,
+    val notes: String,
     val type: TripType
 )
 
