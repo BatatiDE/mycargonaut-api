@@ -1,0 +1,171 @@
+# ===========================
+# Trip Type Definitions
+# ===========================
+# Represents a trip in the system
+type Trip {
+    id: ID!                      # Unique identifier for the trip
+    driverId: ID!                # ID of the driver who created the trip
+    startingPoint: String!          # Starting location of the trip
+    destinationPoint: String!    # Destination location of the trip
+    date: String!                # Date of the trip (format: YYYY-MM-DD)
+    time: String!                # Time of the trip (format: HH:mm)
+    availableSeats: Int!         # Number of available spaces for passengers or packages
+    freightSpace: Float!         # Freight space available for the trip
+    price: Float!                # Price of the trip
+    isFreightRide: Boolean!      # Whether the trip is a freight ride
+    createdAt: String!           # Timestamp for when the trip was created
+    updatedAt: String!           # Timestamp for when the trip was last updated
+    status: String!              # Status of the trip (e.g., SCHEDULED, ONGOING, COMPLETED, CANCELED)
+    bookedUsers: [Booking!]!     # Fetch bookings for the trip
+    type: TripType!             # Type of the trip (e.g., OFFER, REUQEST)
+    vehicle: String         # Vehicle type for the trip
+    notes: String                # Additional notes for the trip
+
+
+}
+
+enum TripType {
+    OFFER,
+    REQUEST
+}
+
+# ===========================
+# Input Types
+# ===========================
+# Input type for adding a new trip
+input AddTripInput {
+    driverId: ID!                # ID of the driver who is adding the trip
+    startingPoint: String!          # Starting location of the trip
+    destinationPoint: String!    # Destination location of the trip
+    date: String!                # Date of the trip (format: YYYY-MM-DD)
+    time: String!                # Time of the trip (format: HH:mm)
+    availableSeats: Int!         # Number of available spaces for passengers or packages
+    freightSpace: Float!         # Freight space available for the trip
+    price: Float!                # Price of the trip
+    isFreightRide: Boolean!      # Whether the trip is a freight ride
+    vehicle: String        # Vehicle type for the trip
+    notes: String                # Additional notes for the trip
+    type: TripType!             # Type of the trip (e.g., OFFER, REUQEST)
+
+}
+
+# ===========================
+# Query Type Definitions
+# ===========================
+# Queries for retrieving trip data
+type Query {
+    # Fetches all available trips
+    getTrips: [Trip!]!           # Returns a list of all trips
+
+    getAllRatings: [Rating!]!
+
+    getAverageRatingByUser(userId: ID!): Float!
+
+
+    getAllReviews: [Review!]!
+    getReviewsByTrip(tripId: ID!): [Review!]!
+
+}
+
+# ===========================
+# Mutation Type Definitions
+# ===========================
+# Mutations for modifying trip and booking data
+type Mutation {
+    # Adds a new trip to the system
+    addTrip(input: AddTripInput!): Trip      # Returns the newly added trip
+
+    # Books a trip for the current user
+    bookTrip(tripId: ID!): BookingResponse! # Returns the booking response
+
+    confirmBooking(bookingId: ID!): BookingResponse # New mutation for confirming a booking
+
+    updateUserRole(userId: ID!, role: String!): User
+
+    startOngoing(tripId: ID!): Trip!
+
+    completeTrip(tripId: ID!): Trip
+
+    updateTripStatus(tripId: ID!, status: String!): Trip
+
+    addRating(voterId: ID!, userId: ID!, tripId: ID!, ratingValue: Float!): Rating!
+
+    addReview(userId: ID!, tripId: ID!, reviewText: String!): Review!
+
+
+
+}
+
+# ===========================
+# Booking Type Definitions
+# ===========================
+# Represents a booking for a trip
+# Represents a booking for a trip
+type Booking {
+    id: ID!                # Unique identifier for the booking
+    userId: ID!            # ID of the user who made the booking
+    tripId: ID!            # ID of the trip being booked
+    status: String!        # Status of the booking (e.g., Booked, Cancelled)
+    createdAt: String!     # Timestamp when the booking was created
+}
+
+
+# ===========================
+# Response Types
+# ===========================
+# Response for booking a trip
+type BookingResponse {
+    success: Boolean!            # Whether the booking was successful
+    message: String!             # Details about the booking operation
+    booking: Booking             # The resulting booking if successful
+}
+
+
+type User {
+    id: ID!
+    email: String!
+    role: String!
+    name: String
+}
+
+# ===========================
+# Review Type Definitions
+# ===========================
+# Response for review a trip
+
+type Review {
+    id: ID!
+    user: User!
+    trip: Trip!
+    reviewText: String!
+    flagCount: Int!
+    status: ReviewStatus!
+}
+
+enum ReviewStatus {
+    APPROVED
+    FLAGGED
+}
+
+
+
+# ===========================
+# Rating Type Definitions
+# ===========================
+# Response for rating a trip
+
+type Rating {
+    id: ID!                   # Unique identifier for the rating
+    user: User!               # The user being rated (e.g., driver or passenger)
+    voter: User!              # The user submitting the rating
+    trip: Trip!               # The trip associated with the rating
+    ratingValue: Float!       # The value of the rating
+}
+
+
+
+
+
+
+
+

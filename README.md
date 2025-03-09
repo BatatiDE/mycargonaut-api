@@ -1,6 +1,3 @@
-
-
-
 # MyCargonaut Backend API
 
 The backend API for MyCargonaut facilitates ride-sharing and freight-sharing services. This repository contains the core logic, authentication, database interaction, and GraphQL APIs required to power the platform.
