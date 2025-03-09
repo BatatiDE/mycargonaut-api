@@ -41,6 +41,11 @@ data class Trip(
     var updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
 
+    // Computed getter, damit GraphQL das Feld driverId abrufen kann
+    fun getDriverId(): Long {
+        return driver.id ?: 0L
+    }
+
     @PreUpdate
     fun preUpdate() {
         updatedAt = LocalDateTime.now()

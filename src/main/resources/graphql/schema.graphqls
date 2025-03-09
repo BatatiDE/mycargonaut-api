@@ -86,6 +86,8 @@ type Mutation {
 
     completeTrip(tripId: ID!): Trip
 
+    updateTripStatus(tripId: ID!, status: String!): Trip
+
     addRating(voterId: ID!, userId: ID!, tripId: ID!, ratingValue: Float!): Rating!
 
     addReview(userId: ID!, tripId: ID!, reviewText: String!): Review!
