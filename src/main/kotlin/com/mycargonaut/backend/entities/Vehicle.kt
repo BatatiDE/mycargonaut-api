@@ -24,5 +24,8 @@ data class Vehicle(
     val licensePlate: String,
 
     @Column(nullable = true)
-    val description: String? = null
+    val description: String? = null,
+
+    @Column(nullable = true)  // Statt nullable = false
+    val capacity: Int? = null
 )
